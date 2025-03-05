@@ -79,9 +79,8 @@
   </nav>
 </header>
 
-<!-- Firebase SDK -->
+<!-- Firebase Authentication -->
 <script type="module">
-  // Import Firebase SDK modules
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
@@ -101,12 +100,26 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
+  // Allowed emails
+  const allowedEmails = [
+    "ha2616@columbia.edu"
+  ];
+
   // Function to Sign in with Google
   window.signInWithGoogle = function () {
     signInWithPopup(auth, provider)
       .then((result) => {
-        console.log("User signed in:", result.user);
-        updateUI(result.user);
+        const user = result.user;
+        console.log("User signed in:", user);
+
+        // Check if the email is allowed
+        if (!allowedEmails.includes(user.email)) {
+          alert("Access Denied: Your email is not authorized.");
+          signOut(auth); // Sign out unauthorized user
+          return;
+        }
+
+        updateUI(user);
       })
       .catch((error) => {
         console.error("Error signing in:", error);
@@ -144,6 +157,14 @@
 
   // Check Auth State on Page Load
   onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // If user is not in the allowed list, sign them out immediately
+      if (!allowedEmails.includes(user.email)) {
+        alert("Access Denied: Your email is not authorized.");
+        signOut(auth);
+        return;
+      }
+    }
     updateUI(user);
   });
 </script>
