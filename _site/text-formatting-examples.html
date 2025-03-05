@@ -165,9 +165,29 @@
         signOut(auth);
         return;
       }
+      startSessionTimer(); // Start session timeout countdown
     }
     updateUI(user);
   });
+  
+  // Function to Start Session Timer
+  function startSessionTimer() {
+    clearTimeout(timeoutTimer);
+    clearTimeout(warningTimer);
+
+    warningTimer = setTimeout(() => {
+      alert("You will be logged out in 2 minutes due to inactivity.");
+    }, sessionTimeout - warningTime);
+
+    timeoutTimer = setTimeout(() => {
+      alert("Session expired. Logging out.");
+      signOut(auth);
+    }, sessionTimeout);
+  }
+
+  // Reset session timer on user activity
+  document.addEventListener("mousemove", startSessionTimer);
+  document.addEventListener("keydown", startSessionTimer);
 </script>
 
 
